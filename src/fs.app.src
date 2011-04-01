@@ -1,0 +1,9 @@
+%% -*- erlang -*-
+{application, fs,
+ [{description, "fs"},
+  {vsn, "0.1"},
+  {modules, []},
+  {registered, []},
+  {mod, {'fs_app', []}},
+  {env, []},
+  {applications, [kernel, stdlib, crypto]}]}.

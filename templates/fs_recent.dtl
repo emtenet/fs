@@ -1,0 +1,33 @@
+<html> 
+<head> 
+  <title>Recent Calls</title> 
+  <link type="text/css" href="/css/standard.css" rel="stylesheet"/>	
+</head> 
+<body> 
+  <h1>Recent Calls - {{ user|escape }}</h1> 
+  <table> 
+    <thead> 
+      <tr> 
+        <th>At</th> 
+        <th>Caller</td> 
+        <th>Duration</th> 
+        <th>Talked With</th> 
+        <th>Start</th> 
+        <th>Finish</th> 
+      </tr> 
+    </thead> 
+    <tbody>
+{% for leg in legs %}
+      <tr> 
+        <td>{{ leg.at }}</td> 
+        <td>{{ leg.caller }}</td> 
+        <td>{{ leg.duration }}</td> 
+        <td>{{ leg.called }}</td> 
+        <td>{{ leg.start }}</td> 
+        <td>{{ leg.finish }}</td> 
+      </tr>
+{% endfor %}
+    </tbody>
+  </table> 
+</body> 
+</html>

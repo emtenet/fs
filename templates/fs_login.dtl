@@ -1,0 +1,25 @@
+<html>
+<head>
+  <title>Login</title>
+  <link type="text/css" href="/css/standard.css" rel="stylesheet"/>
+</head>
+<body>
+  <form action="{{ path }}" method="post">
+    <fieldset class="login">
+      <legend>Login</legend>
+        <div class="field">
+          <label for="user">Extension:</label>
+          <input type="text" name="user" size="10" maxlength="30" value="{{ user }}"/>
+        </div>
+      <div class="field">
+        <label for="pass">Password:</label>
+        <input type="password" name="pass" size="10" maxlength="30" value=""/>
+      </div>
+      <div class="button">
+        <input type="submit" value="Login"/>
+        <input type="submit" value="Cancel"/>
+      </div>
+    </fieldset>
+  </form>
+</body>
+</html>

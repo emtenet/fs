@@ -1,0 +1,54 @@
+body {
+  font-family: Verdana, sans-serif;
+}
+
+fieldset.login {
+  width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+fieldset.login div.field label {
+  display: block;
+  float: left;
+  width: 100px;
+  padding: 3px 5px;
+  text-align: right;
+}
+fieldset.login div.field input {
+  display: block;
+  width: 200px;
+}
+fieldset.login div.button {
+  text-align: center;
+}
+
+table {
+  border: 1px solid #CCC;
+  border-spacing: 0;
+}
+
+table thead {
+  background: #f0f0f0;
+}
+
+table th {
+  padding: 5px;
+  border-left: 1px solid white;
+  border-right: 1px solid #DDD;
+  border-bottom: 1px solid #DDD;
+}
+
+table td {
+  padding: 5px;
+  border-left: 1px solid white;
+  border-right: 1px solid #DDD;
+}
+
+table tr {
+  padding: 5px;
+}
+
+table tr:hover td {
+  background: #d5effc;
+}
+
