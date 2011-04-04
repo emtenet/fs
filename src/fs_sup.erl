@@ -50,18 +50,18 @@ init([]) ->
     {ok, {Strategy, lists:flatten(Processes)}}.
 
 web_specs() ->
-    WebConfig = [
-		{ip, {0,0,0,0}},
-		{port, 8443},
-		{ssl, true},
-		{ssl_opts, [
-			{certfile, "/home/met/ssl/free-server.cert"},
-			{keyfile, "/home/met/ssl/free-server.key"}
-		]},
-		{docroot, fs_deps:local_path(["priv", "www"])}
-	],
+%    WebConfig = [
+%		{ip, {0,0,0,0}},
+%		{port, 8443},
+%		{ssl, true},
+%		{ssl_opts, [
+%			{certfile, "/home/met/ssl/free-server.cert"},
+%			{keyfile, "/home/met/ssl/free-server.key"}
+%		]},
+%		{docroot, fs_deps:local_path(["priv", "www"])}
+%	],
     {fs_web
-		,{fs_web, start, [WebConfig]}
+		,{fs_web, start, []}
 		,permanent
 		, 5000
 		, worker

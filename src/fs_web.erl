@@ -8,21 +8,37 @@
 -module(fs_web).
 -author("Mochi Media <dev@mochimedia.com>").
 
--export([start/1, stop/0, loop/2]).
+-export([start/0, stop/0, request/1]).
 
 %% External API
 
-start(Options) ->
-    {DocRoot, Options1} = get_option(docroot, Options),
-    Loop = fun (Req) ->
-                   ?MODULE:loop(Req, DocRoot)
-           end,
-    mochiweb_http:start([{name, ?MODULE}, {loop, Loop} | Options1]).
+start() ->
+	case application:get_env(docroot) of
+		undefined ->
+			{ok, Application} = application:get_application(),
+			application:set_env(Application, docroot, fs_deps:local_path(["priv", "www"]));
+		_ ->
+			ok
+	end,
+	Config = case application:get_env(web) of
+		{ok, Config0} ->
+			Config0;
+		_ ->
+			[]
+	end,
+	Config1 = proplists:delete(docroot, Config),
+	Config2 = default(Config1, ip, {0,0,0,0}),
+	Config3 = default(Config2, port, 8080),
+    mochiweb_http:start([
+		{name, ?MODULE}, 
+		{loop, fun ?MODULE:request/1} 
+	|	Config3
+	]).
 
 stop() ->
     mochiweb_http:stop(?MODULE).
 
-loop(Req, DocRoot) ->
+request(Req) ->
 	error_logger:info_report(["request", {method, Req:get(method)}, {path, Req:get(path)}]),
     "/" ++ Path = Req:get(path),
     try
@@ -30,11 +46,11 @@ loop(Req, DocRoot) ->
             Method when Method =:= 'GET'; Method =:= 'HEAD' ->
                 case Path of
 					"favicon.ico" ->
-						Req:serve_file(Path, DocRoot);
+						Req:serve_file(Path, docroot());
 					"css/" ++ _ ->
-						Req:serve_file(Path, DocRoot);
+						Req:serve_file(Path, docroot());
 					"js/" ++ _ ->
-						Req:serve_file(Path, DocRoot);
+						Req:serve_file(Path, docroot());
 					"login/" ++ _ ->
 						fs_login:request(Req);
 					_ ->
@@ -64,19 +80,15 @@ loop(Req, DocRoot) ->
 
 %% Internal API
 
-get_option(Option, Options) ->
-    {proplists:get_value(Option, Options), proplists:delete(Option, Options)}.
+docroot() ->
+	{ok, DocRoot} = application:get_env(docroot),
+	DocRoot.
 
-%%
-%% Tests
-%%
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
+default(Config, Key, Value) ->
+	case proplists:is_defined(Key, Config) of
+		true ->
+			Config;
+		_ ->
+			[{Key, Value} | Config]
+	end.
 
-you_should_write_a_test() ->
-    ?assertEqual(
-       "No, but I will!",
-       "Have you written any tests?"),
-    ok.
-
--endif.

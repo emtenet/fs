@@ -1,5 +1,4 @@
-/.eunit
-/ebin
-/doc
-/docs
-/_test
+ebin
+etc/fs.config
+deps
+log
