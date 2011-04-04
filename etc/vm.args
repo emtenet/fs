@@ -1,0 +1,5 @@
+-sname fs
+-setcookie fs
+-pa ebin deps/*/ebin
+-s fs
+-s reloader
