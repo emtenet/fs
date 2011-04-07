@@ -34,7 +34,7 @@ legs() ->
 , start_time
 , finish_time
  limit 30;",
-	{data, Result} = mysql:fetch(mysql_pool, Query),
+	{data, Result} = mysql_pool:fetch(Query),
 	Rows = mysql:get_result_rows(Result),
 	legs(Rows, 0, []).
 

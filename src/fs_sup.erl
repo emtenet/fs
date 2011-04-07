@@ -43,23 +43,14 @@ upgrade() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
-    Web = web_specs(),
-	Mysql = mysql_specs(),
-    Processes = [Web | Mysql],
+    Processes = [
+		web_spec(),
+		mysql_spec()
+	],
     Strategy = {one_for_one, 10, 10}, % max 10 die in 10 seconds
-    {ok, {Strategy, lists:flatten(Processes)}}.
+    {ok, {Strategy, Processes}}.
 
-web_specs() ->
-%    WebConfig = [
-%		{ip, {0,0,0,0}},
-%		{port, 8443},
-%		{ssl, true},
-%		{ssl_opts, [
-%			{certfile, "/home/met/ssl/free-server.cert"},
-%			{keyfile, "/home/met/ssl/free-server.key"}
-%		]},
-%		{docroot, fs_deps:local_path(["priv", "www"])}
-%	],
+web_spec() ->
     {fs_web
 		,{fs_web, start, []}
 		,permanent
@@ -68,23 +59,12 @@ web_specs() ->
 		, dynamic
 	}.
 
-mysql_logger(_Module, _Line, _Level, _FormatFun) ->
-	ok.
-
-mysql_specs() ->
-	[	{mysql_a
-			, {mysql, start, [mysql_pool, "localhost", undefined, "met", "", "fs", fun mysql_logger/4]}
-			, permanent
-			, 5000
-			, worker
-			, dynamic
-		}
-	,	{mysql_b
-			, {mysql, connect, [mysql_pool, "localhost", undefined, "met", "", "fs", undefined, true, false]}
-			, permanent
-			, 5000
-			, worker
-			, dynamic
-		}
-	].
+mysql_spec() ->
+	{mysql
+		, {mysql_pool, start_link, []}
+		, permanent
+		, 5000
+		, worker
+		, dynamic
+	}.
 

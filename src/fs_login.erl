@@ -24,7 +24,6 @@ post(Req) ->
 	Post = Req:parse_post(),
 	User = proplists:get_value("user", Post),
 	Pass = proplists:get_value("pass", Post),
-	%error_logger:info_report(["login post", {post, Post}, {user, User}, {pass, Pass}]),
 	case fs_auth:authenticate(User, Pass) of
 		{ok, User} ->
 			redirect_to(Req, User, Pass);
@@ -34,12 +33,17 @@ post(Req) ->
 
 redirect_to(Req, User, Pass) ->
     "/login" ++ Path = Req:get(path),
-	CookieOptions = [
+	CookieOptions0 = [
 		{path, "/"},
 		{max_age, 7*24*60*60},
-		{secure, true},
 		{httponly, true}
 	],
+	CookieOptions = case Req:get(scheme) of
+		https ->
+			[{secure, true} | CookieOptions0];
+		_ ->
+			CookieOptions0
+	end,
     Headers = [
         {"Location", Path},
 		mochiweb_cookies:cookie("user", User, CookieOptions),

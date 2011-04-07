@@ -8,7 +8,11 @@
 -module(fs_web).
 -author("Mochi Media <dev@mochimedia.com>").
 
--export([start/0, stop/0, request/1]).
+% External exports
+-export([start/0, stop/0]).
+
+% Internal exports
+-export([request/1]).
 
 %% External API
 
@@ -38,51 +42,53 @@ start() ->
 stop() ->
     mochiweb_http:stop(?MODULE).
 
-request(Req) ->
-	error_logger:info_report(["request", {method, Req:get(method)}, {path, Req:get(path)}]),
-    "/" ++ Path = Req:get(path),
-    try
-        case Req:get(method) of
-            Method when Method =:= 'GET'; Method =:= 'HEAD' ->
-                case Path of
-					"favicon.ico" ->
-						Req:serve_file(Path, docroot());
-					"css/" ++ _ ->
-						Req:serve_file(Path, docroot());
-					"js/" ++ _ ->
-						Req:serve_file(Path, docroot());
-					"login/" ++ _ ->
-						fs_login:request(Req);
-					_ ->
-						fs_auth:request(Req)
-                end;
-            'POST' ->
-                case Path of
-					"login/" ++ _ ->
-						fs_login:post(Req);
-                    _ ->
-                        Req:not_found()
-                end;
-            _ ->
-                Req:respond({501, [], []})
-        end
-    catch
-        Type:What ->
-            Report = ["web request failed",
-                      {path, Path},
-                      {type, Type}, {what, What},
-                      {trace, erlang:get_stacktrace()}],
-            error_logger:error_report(Report),
-            %% NOTE: mustache templates need \ because they are not awesome.
-            Req:respond({500, [{"Content-Type", "text/plain"}],
-                         "request failed, sorry\n"})
-    end.
-
 %% Internal API
 
-docroot() ->
+%% @spec request(Req::request()) -> response()
+%%
+%% @doc Attempt to create response to request.
+%%		Catch exceptions and respond with an error message.
+%%
+request(Req) ->
+	error_logger:info_report(["request", {method, Req:get(method)}, {path, Req:get(path)}]),
+    try
+		request(Req, Req:get(method), Req:get(path))
+    catch
+        Type:What ->
+			Report = [
+				"web request failed",
+				{path, Req:get(path)},
+				{type, Type},
+				{what, What},
+				{trace, erlang:get_stacktrace()}
+			],
+			error_logger:error_report(Report),
+            Req:respond({
+				500, 
+				[{"Content-Type", "text/plain"}],
+				"request failed, sorry\n"
+			})
+    end.
+
+%% @spec request(Req::request(), Method::atom(), Path::string()) -> response()
+%%
+%% @doc	Route request processing based on method and path of request
+%%
+request(Req, 'GET', "/favicon.ico") -> serve_file(Req);
+request(Req, 'GET', "/css/" ++ _) -> serve_file(Req);
+request(Req, 'GET', "/js/" ++ _) -> serve_file(Req);
+request(Req, 'GET', "/login/") -> fs_login:request(Req);
+request(Req, 'GET', "/") -> fs_auth:request(Req);
+request(Req, 'GET', _) -> Req:not_found();
+request(Req, 'POST', "/login/") -> fs_login:post(Req);
+request(Req, 'POST', _) -> Req:not_found();
+request(Req, _, _) -> 
+	Req:respond({501, [], []}).
+
+serve_file(Req) ->
+	"/" ++ Path = Req:get(path),
 	{ok, DocRoot} = application:get_env(docroot),
-	DocRoot.
+	Req:serve_file(Path, DocRoot).
 
 default(Config, Key, Value) ->
 	case proplists:is_defined(Key, Config) of
